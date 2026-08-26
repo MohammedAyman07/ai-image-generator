@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- Landing Page Section (Top) -->
+<section class="landing-section">
+    <div class="landing-content hero-section">
+        <h1 class="hero-title">Create Masterpieces with AI</h1>
+        <p class="hero-subtitle">Transform your wildest ideas into stunning visuals instantly using advanced neural
+            networks. Fast, free, and surprisingly simple.</p>
+
+        <div class="feature-bullets">
+            <div class="feature-item">
+                <span class="feature-icon">✨</span>
+                <span>FLUX.1 Model</span>
+            </div>
+            <div class="feature-item">
+                <span class="feature-icon">🚀</span>
+                <span>Instant Generation</span>
+            </div>
+            <div class="feature-item">
+                <span class="feature-icon">💎</span>
+                <span>HD Quality</span>
+            </div>
+        </div>
+
+        <button id="scrollToGenerator" class="cta-button">Generate Image</button>
+    </div>
+</section>
+
+
+
+<!-- Image Generation Section (Below) -->
+<div id="image-generator" class="glass-panel generator-container">
+    <div class="generator-header">
+        <h2>AI Canvas</h2>
+        <p>Your imagination is the only limit. Describe what you see.</p>
+    </div>
+
+    <div class="input-group">
+        <label for="promptInput">Visual Description</label>
+        <textarea id="promptInput" class="prompt-input"
+            placeholder="Describe your masterpiece... (e.g., 'A cyberpunk oasis in a vast desert, hyper-detailed, synthwave colors')"></textarea>
+
+        <div class="prompt-examples">
+            <span class="example-tag">Cyberpunk City</span>
+            <span class="example-tag">Abstract Art</span>
+            <span class="example-tag">Alien Landscape</span>
+            <span class="example-tag">Portait Photo</span>
+            <span class="example-tag">Surreal Forest</span>
+        </div>
+    </div>
+
+    <!-- Controls Row -->
+    <div class="controls-row">
+        <div class="control-group">
+            <label>Canvas Shape</label>
+            <div class="ratio-options" id="ratioOptions">
+                <button class="ratio-btn active" data-ratio="1:1">
+                    <span class="btn-icon">⏹</span> 1:1
+                </button>
+                <button class="ratio-btn" data-ratio="16:9">
+                    <span class="btn-icon">🌅</span> 16:9
+                </button>
+                <button class="ratio-btn" data-ratio="9:16">
+                    <span class="btn-icon">📱</span> 9:16
+                </button>
+            </div>
+        </div>
+        <div class="control-group">
+            <label>Artistic Style</label>
+            <div class="style-select-wrapper">
+                <select id="stylePreset" class="style-select">
+                    <option value="">✨ Original (Raw)</option>
+                    <option value="realistic">📸 Photorealistic</option>
+                    <option value="anime">🎎 Anime Spirit</option>
+                    <option value="cinematic">🎬 Cinematic Master</option>
+                    <option value="illustration">🎨 Digital Art</option>
+                    <option value="logo">📐 Vector Logo</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <button id="generateBtn" class="generate-btn">⚡ Create My Masterpiece</button>
+
+    <!-- Output Area -->
+    <div id="outputArea" class="output-area">
+        <div id="placeholderText" class="placeholder-text">
+            <div class="placeholder-content">
+                <span style="font-size: 3rem; display: block; margin-bottom: 1rem; opacity: 0.3;">✨</span>
+                <p>Your AI creations will materialize here</p>
+            </div>
+        </div>
+        <div id="imageGrid" class="image-grid">
+            <!-- New images appear first -->
+        </div>
+    </div>
+</div>
+
+
+<!-- Improved Info Section -->
+<section class="info-grid-section">
+    <div class="info-card glass-panel">
+        <div class="info-icon">💎</div>
+        <div class="info-content">
+            <h3>Professional AI Art Tool</h3>
+            <p>Unlock your creative potential with our professional-grade AI image generator. Whether you're a designer,
+                content creator, or hobbyist, our platform provides the tools you need to bring your imagination to
+                life.</p>
+        </div>
+    </div>
+
+    <div class="info-card glass-panel">
+        <div class="info-icon">🚀</div>
+        <div class="info-content">
+            <h3>Why Choose AI Imagine?</h3>
+            <p>We leverage the latest advancements in machine learning, specifically the FLUX.1 model, to ensure the
+                highest fidelity and adherence to your prompts. Our interface is designed for speed and ease of use.</p>
+        </div>
+    </div>
+
+    <div class="info-card glass-panel">
+        <div class="info-icon">🌍</div>
+        <div class="info-content">
+            <h3>Limitless Creativity</h3>
+            <p>From photorealistic landscapes to abstract concept art, our AI understands your vision and materializes
+                it in seconds. High-end AI art is now accessible to everyone, everywhere.</p>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+{% endblock %}

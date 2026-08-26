@@ -1,0 +1,6 @@
+flask
+huggingface_hub
+python-dotenv
+Pillow
+pytest
+pytest-flask

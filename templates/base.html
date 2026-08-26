@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}AI Image Generator - Create Amazing Art with AI{% endblock %}</title>
+    <meta name="description"
+        content="{% block description %}Free AI Image Generator using Hugging Face FLUX model. Create stunning visuals from text prompts instantly.{% endblock %}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    {% block head %}{% endblock %}
+</head>
+
+<body>
+    <header>
+        <div class="container nav-container">
+            <a href="/" class="files-logo">AI IMAGINE</a>
+            <nav>
+                <ul>
+                    <li><a href="/" class="{% if request.endpoint == 'index' %}active{% endif %}">Home</a></li>
+                    <li><a href="/about" class="{% if request.endpoint == 'about' %}active{% endif %}">About</a></li>
+                    <li><a href="/contact" class="{% if request.endpoint == 'contact' %}active{% endif %}">Contact</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+    <main class="container">
+        <div class="page-layout">
+            <div class="content-column full-width">
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <h3>AI Imagine</h3>
+                    <p>A Product of <a href="#" target="_blank"
+                            class="brand-link">Ayimage Generation</a></p>
+                    <p class="mission-text">Empowering creativity through artificial intelligence.</p>
+                </div>
+                <div class="footer-links">
+                    <h3>Legal</h3>
+                    <ul>
+                        <li><a href="/privacy">Privacy Policy</a></li>
+                        <li><a href="/terms">Terms & Conditions</a></li>
+                    </ul>
+                </div>
+                <div class="footer-links">
+                    <h3>Explore</h3>
+                    <ul>
+                        <li><a href="/">Home</a></li>
+                        <li><a href="/about">About Us</a></li>
+                        <li><a href="/contact">Contact</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                &copy; {{ now_year }} AI Imagine. Built with ❤️ by <a href="#"
+                    target="_blank">Ayimage Generation</a>.
+            </div>
+        </div>
+    </footer>
+
+    {% block scripts %}{% endblock %}
+</body>
+
+</html>
