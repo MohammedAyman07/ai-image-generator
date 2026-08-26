@@ -4,6 +4,8 @@ A lightweight, high-performance web application that generates stunning images f
 
 ## Overview
 
+**🚀 Live Demo:** [https://ai-image-generator-three-iota.vercel.app/](https://ai-image-generator-three-iota.vercel.app/)
+
 This project was built to provide an accessible, fast, and highly customizable AI art generation tool. It leverages state-of-the-art machine learning models via the Hugging Face Inference API and provides a clean, responsive, and glassmorphic UI for users to seamlessly generate, view, and download their creations. 
 
 ## Features
