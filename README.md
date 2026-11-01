@@ -4,7 +4,7 @@
 
 ## About
 
-This is an AI image generator I built using Python, Flask and the Cloudflare Workers AI.
+This is an AI image generator I built using Python, Flask and Cloudflare Workers AI.
 
 You enter a text prompt, choose some options and the app sends the request to Cloudflare's FLUX.1-schnell image generation model. The generated image is then shown on the website and can be downloaded.
 
@@ -50,7 +50,6 @@ The Cloudflare account ID and API token are stored as server-side environment va
 - Flask
 - Cloudflare Workers AI REST API
 - FLUX.1-schnell
-- Pillow
 - HTML5
 - CSS3
 - JavaScript (ES6+)
@@ -187,7 +186,6 @@ This project helped me learn more about:
 - Python and Flask backend development
 - Working with the Cloudflare Workers AI API
 - Environment variables and API key security
-- Image processing with Pillow
 - REST-style request handling
 - Rate limiting
 - Writing backend tests with pytest
