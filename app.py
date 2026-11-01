@@ -1,7 +1,6 @@
 import os
 import time
 import json
-import uuid
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
@@ -15,11 +14,7 @@ app = Flask(__name__)
 CLOUDFLARE_ACCOUNT_ID = os.environ.get("CLOUDFLARE_ACCOUNT_ID")
 CLOUDFLARE_API_TOKEN = os.environ.get("CLOUDFLARE_API_TOKEN")
 MODEL = "@cf/black-forest-labs/flux-1-schnell"
-IMAGE_SIZES = {
-    "1:1": (1024, 1024),
-    "16:9": (1280, 720),
-    "9:16": (720, 1280),
-}
+SUPPORTED_RATIOS = {"1:1", "16:9", "9:16"}
 
 # In-memory cooldown. Use a shared store such as Redis if scaling across instances.
 last_request_time = {}
@@ -106,26 +101,11 @@ def contact():
     return render_template("contact.html")
 
 
-def make_multipart_body(fields, boundary):
-    chunks = []
-    for name, value in fields.items():
-        chunks.extend([
-            f"--{boundary}\r\n".encode("utf-8"),
-            f'Content-Disposition: form-data; name="{name}"\r\n\r\n'.encode("utf-8"),
-            str(value).encode("utf-8"),
-            b"\r\n",
-        ])
-    chunks.append(f"--{boundary}--\r\n".encode("utf-8"))
-    return b"".join(chunks)
-
-
-def request_cloudflare_image(model, prompt, width, height):
-    boundary = "----AymanImageGeneration" + uuid.uuid4().hex
-    body = make_multipart_body({
+def request_cloudflare_image(model, prompt):
+    body = json.dumps({
         "prompt": prompt,
-        "width": width,
-        "height": height,
-    }, boundary)
+        "steps": 4,
+    }).encode("utf-8")
     endpoint = (
         "https://api.cloudflare.com/client/v4/accounts/"
         f"{CLOUDFLARE_ACCOUNT_ID}/ai/run/{model}"
@@ -135,7 +115,7 @@ def request_cloudflare_image(model, prompt, width, height):
         data=body,
         headers={
             "Authorization": f"Bearer {CLOUDFLARE_API_TOKEN}",
-            "Content-Type": f"multipart/form-data; boundary={boundary}",
+            "Content-Type": "application/json",
         },
         method="POST",
     )
@@ -165,7 +145,7 @@ def generate_image():
         return jsonify({"error": "Prompt is required"}), 400
     if len(prompt) > 2048:
         return jsonify({"error": "Prompt must be 2,048 characters or fewer."}), 400
-    if ratio not in IMAGE_SIZES:
+    if ratio not in SUPPORTED_RATIOS:
         return jsonify({"error": "Choose a supported aspect ratio."}), 400
 
     ip_address = request.remote_addr or "unknown"
@@ -175,9 +155,8 @@ def generate_image():
             "error": f"Please wait {max(1, int(wait_time))} seconds before generating another image."
         }), 429
 
-    width, height = IMAGE_SIZES[ratio]
     try:
-        image_data = request_cloudflare_image(MODEL, prompt, width, height)
+        image_data = request_cloudflare_image(MODEL, prompt)
         return jsonify({
             "image": f"data:image/jpeg;base64,{image_data}",
             "model": MODEL,
