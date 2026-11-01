@@ -96,7 +96,7 @@ button:focus-visible, a:focus-visible, select:focus-visible, textarea:focus-visi
 .intro-meta small { margin-top: 2px; color: var(--muted); font-size: 11px; }
 
 .studio-workspace {
-    padding: 30px;
+    padding: 26px;
     border: 1px solid var(--line);
     border-radius: var(--radius-lg);
     background: var(--surface);
