@@ -1,6 +1,7 @@
 import os
 import time
 import json
+import uuid
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
 
@@ -13,7 +14,12 @@ app = Flask(__name__)
 
 CLOUDFLARE_ACCOUNT_ID = os.environ.get("CLOUDFLARE_ACCOUNT_ID")
 CLOUDFLARE_API_TOKEN = os.environ.get("CLOUDFLARE_API_TOKEN")
-MODEL = "@cf/black-forest-labs/flux-1-schnell"
+MODEL = "@cf/black-forest-labs/flux-2-klein-9b"
+IMAGE_SIZES = {
+    "1:1": (1024, 1024),
+    "16:9": (1280, 720),
+    "9:16": (720, 1280),
+}
 
 # In-memory cooldown. Use a shared store such as Redis if scaling across instances.
 last_request_time = {}
@@ -70,6 +76,19 @@ def cloudflare_error_message(status, body):
     return "The image service is temporarily unavailable. Please try again shortly."
 
 
+def make_multipart_body(fields, boundary):
+    chunks = []
+    for name, value in fields.items():
+        chunks.extend([
+            f"--{boundary}\r\n".encode("utf-8"),
+            f'Content-Disposition: form-data; name="{name}"\r\n\r\n'.encode("utf-8"),
+            str(value).encode("utf-8"),
+            b"\r\n",
+        ])
+    chunks.append(f"--{boundary}--\r\n".encode("utf-8"))
+    return b"".join(chunks)
+
+
 @app.route("/generate", methods=["POST"])
 def generate_image():
     if not CLOUDFLARE_ACCOUNT_ID or not CLOUDFLARE_API_TOKEN:
@@ -79,10 +98,13 @@ def generate_image():
 
     data = request.get_json(silent=True) or {}
     prompt = (data.get("prompt") or "").strip()
+    ratio = data.get("ratio", "1:1")
     if not prompt:
         return jsonify({"error": "Prompt is required"}), 400
     if len(prompt) > 2048:
         return jsonify({"error": "Prompt must be 2,048 characters or fewer."}), 400
+    if ratio not in IMAGE_SIZES:
+        return jsonify({"error": "Choose a supported aspect ratio."}), 400
 
     ip_address = request.remote_addr or "unknown"
     allowed, wait_time = check_rate_limit(ip_address)
@@ -91,17 +113,23 @@ def generate_image():
             "error": f"Please wait {max(1, int(wait_time))} seconds before generating another image."
         }), 429
 
+    width, height = IMAGE_SIZES[ratio]
+    boundary = "----AymanImageGeneration" + uuid.uuid4().hex
+    body = make_multipart_body({
+        "prompt": prompt,
+        "width": width,
+        "height": height,
+    }, boundary)
     endpoint = (
         "https://api.cloudflare.com/client/v4/accounts/"
         f"{CLOUDFLARE_ACCOUNT_ID}/ai/run/{MODEL}"
     )
-    body = json.dumps({"prompt": prompt, "steps": 4}).encode("utf-8")
     api_request = Request(
         endpoint,
         data=body,
         headers={
             "Authorization": f"Bearer {CLOUDFLARE_API_TOKEN}",
-            "Content-Type": "application/json",
+            "Content-Type": f"multipart/form-data; boundary={boundary}",
         },
         method="POST",
     )
@@ -118,7 +146,13 @@ def generate_image():
     except HTTPError as error:
         message = cloudflare_error_message(error.code, error.read())
         app.logger.warning("Cloudflare Workers AI request failed with HTTP %s", error.code)
-        return jsonify({"error": message}), 503 if error.code in (401, 402, 403, 429) else 502
+        if error.code == 429 or "daily limit" in message.lower():
+            status_code = 429
+        elif error.code in (401, 402, 403):
+            status_code = 503
+        else:
+            status_code = 502
+        return jsonify({"error": message}), status_code
     except (URLError, TimeoutError):
         app.logger.exception("Could not reach Cloudflare Workers AI")
         return jsonify({"error": "Could not reach the image service. Please try again shortly."}), 502

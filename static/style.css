@@ -38,7 +38,7 @@ button:focus-visible, a:focus-visible, select:focus-visible, textarea:focus-visi
     outline-offset: 3px;
 }
 .container { width: min(1180px, calc(100% - 48px)); margin-inline: auto; }
-.main-shell { flex: 1; padding-top: 62px; padding-bottom: 84px; }
+.main-shell { width: min(1020px, calc(100% - 48px)); max-width: 1020px; flex: 1; padding-top: 38px; padding-bottom: 64px; }
 
 .site-header {
     position: sticky;
@@ -81,7 +81,7 @@ button:focus-visible, a:focus-visible, select:focus-visible, textarea:focus-visi
 .eyebrow-rule { width: 20px; height: 1px; background: #718478; }
 .studio-intro h1 {
     margin: 0; color: var(--ink); font-family: Manrope, sans-serif;
-    font-size: clamp(38px, 5vw, 56px); font-weight: 700; line-height: 1.12; letter-spacing: -2.7px;
+    font-size: clamp(36px, 4.2vw, 49px); font-weight: 700; line-height: 1.12; letter-spacing: -2.1px;
 }
 .studio-intro h1 span { color: #718078; }
 .intro-description { margin: 15px 0 0; color: var(--muted); font-size: 15px; }
@@ -96,7 +96,7 @@ button:focus-visible, a:focus-visible, select:focus-visible, textarea:focus-visi
 .intro-meta small { margin-top: 2px; color: var(--muted); font-size: 11px; }
 
 .studio-workspace {
-    padding: 30px;
+    padding: 26px;
     border: 1px solid var(--line);
     border-radius: var(--radius-lg);
     background: var(--surface);
@@ -175,7 +175,7 @@ button:focus-visible, a:focus-visible, select:focus-visible, textarea:focus-visi
 .generation-error[hidden] { display: none; }
 .loading-spinner { width: 14px; height: 14px; border: 2px solid rgba(255,255,255,.35); border-top-color: #fff; border-radius: 50%; animation: spin .8s linear infinite; }
 
-.gallery-section { margin-top: 44px; }
+.gallery-section { margin-top: 34px; }
 .gallery-heading { margin-bottom: 16px; align-items: flex-end; }
 .gallery-heading h2 { font-size: 18px; }
 .gallery-count { color: #89938c; font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500; }
@@ -255,7 +255,7 @@ button:focus-visible, a:focus-visible, select:focus-visible, textarea:focus-visi
     .studio-intro { align-items: flex-start; flex-direction: column; padding-bottom: 24px; }
     .studio-intro h1 { letter-spacing: -1.8px; }
     .intro-meta { padding: 10px 12px; }
-    .studio-workspace { padding: 22px 18px; }
+    .studio-workspace { padding: 20px 18px; }
     .generator-settings { grid-template-columns: 1fr; gap: 18px; }
     .ratio-options { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
     .ratio-btn { padding-inline: 7px; }
