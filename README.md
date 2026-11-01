@@ -4,9 +4,9 @@
 
 ## About
 
-This is an AI image generator I built using Python, Flask and the Hugging Face Inference API.
+This is an AI image generator I built using Python, Flask and Cloudflare Workers AI.
 
-You enter a text prompt, choose some options and the app sends the request to a Hugging Face image generation model. The generated image is then shown on the website and can be downloaded.
+You enter a text prompt, choose some options and the app sends the request to Cloudflare's FLUX.1-schnell image generation model. The generated image is then shown on the website and can be downloaded.
 
 I built this project to learn more about connecting an AI model to a real web application and handling the backend part instead of only building the frontend.
 
@@ -33,7 +33,7 @@ Frontend sends request
        ↓
 Flask backend
        ↓
-Hugging Face Inference API
+Cloudflare Workers AI REST API
        ↓
 FLUX.1-schnell generates image
        ↓
@@ -42,15 +42,14 @@ Backend returns image
 Frontend displays image
 ```
 
-The Hugging Face token is stored in an environment variable, so it is not placed in the frontend code.
+The Cloudflare account ID and API token are stored as server-side environment variables and are never sent to the browser.
 
 ## Technologies Used
 
 - Python
 - Flask
-- Hugging Face `huggingface_hub`
+- Cloudflare Workers AI REST API
 - FLUX.1-schnell
-- Pillow
 - HTML5
 - CSS3
 - JavaScript (ES6+)
@@ -95,15 +94,18 @@ cd ai-image-generator
 pip install -r requirements.txt
 ```
 
-### 3. Add your Hugging Face token
+### 3. Set up free image generation
+
+Create a free Cloudflare account and enable Workers AI. Cloudflare currently includes 10,000 Neurons per day at no charge; the quota resets daily. Create a Workers AI API token from the Workers AI dashboard and copy your Account ID. The token needs Workers AI Read and Edit permissions.
 
 Create a `.env` file using `.env.example`:
 
 ```env
-HF_TOKEN=your_hugging_face_token_here
+CLOUDFLARE_ACCOUNT_ID=your_cloudflare_account_id
+CLOUDFLARE_API_TOKEN=your_workers_ai_api_token
 ```
 
-Do not commit your real token to GitHub.
+Keep these values private and do not commit your real token to GitHub.
 
 ### 4. Run the app
 
@@ -127,13 +129,7 @@ http://127.0.0.1:5000
 
 The project can be deployed on Vercel using the included `vercel.json` configuration.
 
-After deploying, add this environment variable in the Vercel project settings:
-
-```text
-HF_TOKEN=your_hugging_face_token
-```
-
-The token should only be stored as a server-side environment variable.
+In Vercel, open **Project Settings → Environment Variables** and add `CLOUDFLARE_ACCOUNT_ID` and `CLOUDFLARE_API_TOKEN`. Apply them to the Production environment, then redeploy. Store them as server-side variables; never add them to frontend code.
 
 ## Rate Limiting
 
@@ -162,13 +158,13 @@ The tests currently check things such as:
 
 ## AI Model
 
-The project uses the pretrained `black-forest-labs/FLUX.1-schnell` model through Hugging Face.
+The project uses the `@cf/black-forest-labs/flux-1-schnell` model through Cloudflare Workers AI.
 
 I did not train the model myself. My work in this project was mainly around integrating the model into a web application, handling the API request, backend security, image processing, frontend interaction and deployment.
 
 ## Security
 
-The Hugging Face API token is loaded from an environment variable using `python-dotenv`.
+The Cloudflare API token and account ID are loaded from server-side environment variables using `python-dotenv`.
 
 The token is not included in the frontend JavaScript or HTML.
 
@@ -188,9 +184,8 @@ This project helped me learn more about:
 
 - Connecting an AI model to a web application
 - Python and Flask backend development
-- Working with the Hugging Face API
+- Working with the Cloudflare Workers AI API
 - Environment variables and API key security
-- Image processing with Pillow
 - REST-style request handling
 - Rate limiting
 - Writing backend tests with pytest
