@@ -14,8 +14,7 @@ app = Flask(__name__)
 
 CLOUDFLARE_ACCOUNT_ID = os.environ.get("CLOUDFLARE_ACCOUNT_ID")
 CLOUDFLARE_API_TOKEN = os.environ.get("CLOUDFLARE_API_TOKEN")
-MODEL = "@cf/black-forest-labs/flux-2-klein-9b"
-FALLBACK_MODEL = "@cf/black-forest-labs/flux-1-schnell"
+MODEL = "@cf/black-forest-labs/flux-1-schnell"
 IMAGE_SIZES = {
     "1:1": (1024, 1024),
     "16:9": (1280, 720),
@@ -59,6 +58,8 @@ def cloudflare_error_message(status, details):
         return "Cloudflare rejected the API token. Check CLOUDFLARE_API_TOKEN and confirm it has Workers AI permission."
     if status == 403:
         return "Cloudflare denied access to this model. Check the account ID and Workers AI access for the token."
+    if status == 400 and ("flagged" in lowered or "safety" in lowered):
+        return "Cloudflare blocked this prompt with its safety filter. Please reword the prompt and try again."
     if status == 402 or any(term in lowered for term in ("payment required", "no remaining credits", "insufficient credits")):
         return "Cloudflare reports that this account has no image-generation credits available. Check Workers AI usage and billing in Cloudflare."
     if status == 429 or any(term in lowered for term in ("quota", "daily limit", "neurons exhausted", "rate limit")):
@@ -68,15 +69,6 @@ def cloudflare_error_message(status, details):
     if details:
         return f"Cloudflare rejected the image request (HTTP {status}): {details}"
     return f"Cloudflare rejected the image request (HTTP {status}). Check the Cloudflare Workers AI settings."
-
-
-def should_try_fallback(error):
-    details = (error.details or "").lower()
-    model_issue = any(term in details for term in (
-        "model", "not found", "not available", "not enabled", "unsupported",
-        "paid plan", "plan required",
-    ))
-    return error.status in (400, 403) and model_issue
 
 
 def check_rate_limit(ip_address):
@@ -184,32 +176,11 @@ def generate_image():
         }), 429
 
     width, height = IMAGE_SIZES[ratio]
-    used_model = MODEL
     try:
-        try:
-            image_data = request_cloudflare_image(MODEL, prompt, width, height)
-        except CloudflareRequestError as primary_error:
-            if not should_try_fallback(primary_error):
-                raise
-            app.logger.warning(
-                "Primary Workers AI model was unavailable (HTTP %s); trying free fallback model",
-                primary_error.status,
-            )
-            try:
-                image_data = request_cloudflare_image(FALLBACK_MODEL, prompt, width, height)
-                used_model = FALLBACK_MODEL
-            except CloudflareRequestError as fallback_error:
-                app.logger.warning(
-                    "Workers AI fallback failed with HTTP %s: %s",
-                    fallback_error.status,
-                    fallback_error.details,
-                )
-                message = cloudflare_error_message(fallback_error.status, fallback_error.details)
-                return jsonify({"error": message}), 429 if fallback_error.status == 429 else 502
-
+        image_data = request_cloudflare_image(MODEL, prompt, width, height)
         return jsonify({
             "image": f"data:image/jpeg;base64,{image_data}",
-            "model": used_model,
+            "model": MODEL,
         })
 
     except CloudflareRequestError as error:
