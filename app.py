@@ -15,6 +15,7 @@ app = Flask(__name__)
 CLOUDFLARE_ACCOUNT_ID = os.environ.get("CLOUDFLARE_ACCOUNT_ID")
 CLOUDFLARE_API_TOKEN = os.environ.get("CLOUDFLARE_API_TOKEN")
 MODEL = "@cf/black-forest-labs/flux-2-klein-9b"
+FALLBACK_MODEL = "@cf/black-forest-labs/flux-1-schnell"
 IMAGE_SIZES = {
     "1:1": (1024, 1024),
     "16:9": (1280, 720),
@@ -24,6 +25,58 @@ IMAGE_SIZES = {
 # In-memory cooldown. Use a shared store such as Redis if scaling across instances.
 last_request_time = {}
 RATE_LIMIT_SECONDS = 2
+
+
+class CloudflareRequestError(Exception):
+    def __init__(self, status, body):
+        self.status = status
+        self.details = extract_cloudflare_details(body)
+        super().__init__(self.details or f"HTTP {status}")
+
+
+def extract_cloudflare_details(body):
+    try:
+        payload = json.loads(body)
+    except (json.JSONDecodeError, UnicodeDecodeError, TypeError):
+        return body.decode("utf-8", errors="replace").strip()[:500] if isinstance(body, bytes) else str(body)[:500]
+
+    errors = payload.get("errors") or []
+    messages = []
+    for error in errors:
+        if isinstance(error, dict):
+            message = error.get("message")
+            code = error.get("code")
+            if message:
+                messages.append(f"{message} (code {code})" if code else message)
+        elif error:
+            messages.append(str(error))
+    return "; ".join(messages)[:500] or str(payload.get("message", ""))[:500]
+
+
+def cloudflare_error_message(status, details):
+    lowered = (details or "").lower()
+    if status == 401:
+        return "Cloudflare rejected the API token. Check CLOUDFLARE_API_TOKEN and confirm it has Workers AI permission."
+    if status == 403:
+        return "Cloudflare denied access to this model. Check the account ID and Workers AI access for the token."
+    if status == 402 or any(term in lowered for term in ("payment required", "no remaining credits", "insufficient credits")):
+        return "Cloudflare reports that this account has no image-generation credits available. Check Workers AI usage and billing in Cloudflare."
+    if status == 429 or any(term in lowered for term in ("quota", "daily limit", "neurons exhausted", "rate limit")):
+        return "Cloudflare's free daily image-generation quota or rate limit has been reached. Try again after it resets."
+    if status >= 500:
+        return "Cloudflare's image service is temporarily unavailable. Please try again shortly."
+    if details:
+        return f"Cloudflare rejected the image request (HTTP {status}): {details}"
+    return f"Cloudflare rejected the image request (HTTP {status}). Check the Cloudflare Workers AI settings."
+
+
+def should_try_fallback(error):
+    details = (error.details or "").lower()
+    model_issue = any(term in details for term in (
+        "model", "not found", "not available", "not enabled", "unsupported",
+        "paid plan", "plan required",
+    ))
+    return error.status in (400, 403) and model_issue
 
 
 def check_rate_limit(ip_address):
@@ -61,21 +114,6 @@ def contact():
     return render_template("contact.html")
 
 
-def cloudflare_error_message(status, body):
-    try:
-        payload = json.loads(body)
-        errors = payload.get("errors") or []
-        details = " ".join(error.get("message", "") for error in errors).lower()
-    except (json.JSONDecodeError, AttributeError):
-        details = body.decode("utf-8", errors="replace").lower()
-
-    if status == 401 or status == 403:
-        return "Cloudflare rejected the API token. Check that it has Workers AI permissions."
-    if status == 429 or "quota" in details or "limit" in details:
-        return "The free image-generation limit has been reached. Please try again after the daily limit resets."
-    return "The image service is temporarily unavailable. Please try again shortly."
-
-
 def make_multipart_body(fields, boundary):
     chunks = []
     for name, value in fields.items():
@@ -87,6 +125,38 @@ def make_multipart_body(fields, boundary):
         ])
     chunks.append(f"--{boundary}--\r\n".encode("utf-8"))
     return b"".join(chunks)
+
+
+def request_cloudflare_image(model, prompt, width, height):
+    boundary = "----AymanImageGeneration" + uuid.uuid4().hex
+    body = make_multipart_body({
+        "prompt": prompt,
+        "width": width,
+        "height": height,
+    }, boundary)
+    endpoint = (
+        "https://api.cloudflare.com/client/v4/accounts/"
+        f"{CLOUDFLARE_ACCOUNT_ID}/ai/run/{model}"
+    )
+    api_request = Request(
+        endpoint,
+        data=body,
+        headers={
+            "Authorization": f"Bearer {CLOUDFLARE_API_TOKEN}",
+            "Content-Type": f"multipart/form-data; boundary={boundary}",
+        },
+        method="POST",
+    )
+    try:
+        with urlopen(api_request, timeout=120) as response:
+            result = json.loads(response.read().decode("utf-8"))
+    except HTTPError as error:
+        raise CloudflareRequestError(error.code, error.read()) from None
+
+    image_data = (result.get("result") or {}).get("image")
+    if not image_data:
+        raise ValueError("Cloudflare returned a successful response without image data.")
+    return image_data
 
 
 @app.route("/generate", methods=["POST"])
@@ -114,51 +184,54 @@ def generate_image():
         }), 429
 
     width, height = IMAGE_SIZES[ratio]
-    boundary = "----AymanImageGeneration" + uuid.uuid4().hex
-    body = make_multipart_body({
-        "prompt": prompt,
-        "width": width,
-        "height": height,
-    }, boundary)
-    endpoint = (
-        "https://api.cloudflare.com/client/v4/accounts/"
-        f"{CLOUDFLARE_ACCOUNT_ID}/ai/run/{MODEL}"
-    )
-    api_request = Request(
-        endpoint,
-        data=body,
-        headers={
-            "Authorization": f"Bearer {CLOUDFLARE_API_TOKEN}",
-            "Content-Type": f"multipart/form-data; boundary={boundary}",
-        },
-        method="POST",
-    )
-
+    used_model = MODEL
     try:
-        with urlopen(api_request, timeout=120) as response:
-            result = json.loads(response.read().decode("utf-8"))
-        image_data = (result.get("result") or {}).get("image")
-        if not image_data:
-            app.logger.error("Cloudflare Workers AI response did not include image data")
-            return jsonify({"error": "The image service returned an empty result. Please try again."}), 502
-        return jsonify({"image": f"data:image/jpeg;base64,{image_data}"})
+        try:
+            image_data = request_cloudflare_image(MODEL, prompt, width, height)
+        except CloudflareRequestError as primary_error:
+            if not should_try_fallback(primary_error):
+                raise
+            app.logger.warning(
+                "Primary Workers AI model was unavailable (HTTP %s); trying free fallback model",
+                primary_error.status,
+            )
+            try:
+                image_data = request_cloudflare_image(FALLBACK_MODEL, prompt, width, height)
+                used_model = FALLBACK_MODEL
+            except CloudflareRequestError as fallback_error:
+                app.logger.warning(
+                    "Workers AI fallback failed with HTTP %s: %s",
+                    fallback_error.status,
+                    fallback_error.details,
+                )
+                message = cloudflare_error_message(fallback_error.status, fallback_error.details)
+                return jsonify({"error": message}), 429 if fallback_error.status == 429 else 502
 
-    except HTTPError as error:
-        message = cloudflare_error_message(error.code, error.read())
-        app.logger.warning("Cloudflare Workers AI request failed with HTTP %s", error.code)
-        if error.code == 429 or "daily limit" in message.lower():
+        return jsonify({
+            "image": f"data:image/jpeg;base64,{image_data}",
+            "model": used_model,
+        })
+
+    except CloudflareRequestError as error:
+        app.logger.warning(
+            "Workers AI request failed with HTTP %s: %s",
+            error.status,
+            error.details,
+        )
+        message = cloudflare_error_message(error.status, error.details)
+        if error.status == 429 or "daily" in message.lower():
             status_code = 429
-        elif error.code in (401, 402, 403):
+        elif error.status in (401, 402, 403):
             status_code = 503
         else:
             status_code = 502
         return jsonify({"error": message}), status_code
     except (URLError, TimeoutError):
         app.logger.exception("Could not reach Cloudflare Workers AI")
-        return jsonify({"error": "Could not reach the image service. Please try again shortly."}), 502
+        return jsonify({"error": "Could not reach Cloudflare. Check the Vercel function logs and try again shortly."}), 502
     except (json.JSONDecodeError, UnicodeDecodeError, ValueError):
         app.logger.exception("Could not read Cloudflare Workers AI response")
-        return jsonify({"error": "The image service returned an invalid response. Please try again."}), 502
+        return jsonify({"error": "Cloudflare returned an invalid image response. Check the Vercel function logs for details."}), 502
 
 
 if __name__ == "__main__":
