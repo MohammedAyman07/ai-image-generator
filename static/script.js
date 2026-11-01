@@ -74,9 +74,6 @@ document.addEventListener('DOMContentLoaded', () => {
         if (selectedStyle && styleKeywords[selectedStyle]) {
             fullPrompt += ', ' + styleKeywords[selectedStyle];
         }
-        if (selectedRatio !== '1:1') {
-            fullPrompt += ', ' + selectedRatio + ' aspect ratio';
-        }
 
         const skeletonItem = createSkeletonItem(selectedRatio);
         imageGrid.prepend(skeletonItem);
