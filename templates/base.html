@@ -9,7 +9,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v='20261101') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css', v='studio-2') }}">
     {% block head %}{% endblock %}
 </head>
 <body>
@@ -25,7 +25,7 @@
                 <span class="brand-copy"><strong>Ayman</strong><span>Image Generation</span></span>
             </a>
             <div class="nav-right">
-                <span class="model-indicator"><span class="status-dot" aria-hidden="true"></span> FLUX.1 Schnell</span>
+                <span class="model-indicator"><span class="status-dot" aria-hidden="true"></span> FLUX.2 Klein 9B</span>
                 <nav aria-label="Main navigation">
                     <a href="/" class="{% if request.endpoint == 'index' %}active{% endif %}">Create</a>
                     <a href="/about" class="{% if request.endpoint == 'about' %}active{% endif %}">About</a>
