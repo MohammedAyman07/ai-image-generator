@@ -88,7 +88,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const response = await fetch('/generate', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ prompt: fullPrompt })
+                body: JSON.stringify({ prompt: fullPrompt, ratio: selectedRatio })
             });
             const data = await response.json().catch(() => ({}));
 
