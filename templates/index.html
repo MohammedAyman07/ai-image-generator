@@ -7,14 +7,14 @@
 <section class="studio-intro" aria-labelledby="page-title">
     <div class="intro-copy">
         <p class="eyebrow"><span class="eyebrow-rule"></span> YOUR CREATIVE STUDIO</p>
-        <h1 id="page-title">Turn a thought<br><span>into an image.</span></h1>
-        <p class="intro-description">Describe what you have in mind. Shape the details. Make it yours.</p>
+        <h1 id="page-title">Make the image<br><span>you have in mind.</span></h1>
+        <p class="intro-description">Set the scene, choose your format, and create with a higher-detail model.</p>
     </div>
     <div class="intro-meta" aria-label="Image model">
         <span class="meta-icon" aria-hidden="true">
             <svg viewBox="0 0 24 24" fill="none"><path d="M12 2.5 14.6 9.4 21.5 12l-6.9 2.6-2.6 6.9-2.6-6.9L2.5 12l6.9-2.6L12 2.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/></svg>
         </span>
-        <span><strong>Powered by FLUX.1 Schnell</strong><small>Text to image</small></span>
+        <span><strong>FLUX.2 Klein 9B</strong><small>Higher-detail image model</small></span>
     </div>
 </section>
 
@@ -22,15 +22,15 @@
     <div class="workspace-heading">
         <div>
             <p class="section-kicker">NEW CREATION</p>
-            <h2 id="workspace-title">What would you like to see?</h2>
+            <h2 id="workspace-title">Describe your image</h2>
         </div>
-        <span class="workspace-count">01 <span>/</span> PROMPT</span>
+        <span class="workspace-count">FLUX.2 <span>·</span> 9B MODEL</span>
     </div>
 
     <form id="generatorForm" class="generator-form">
         <div class="prompt-composer">
             <label class="visually-hidden" for="promptInput">Describe the image you want to create</label>
-            <textarea id="promptInput" name="prompt" maxlength="2048" rows="4" placeholder="A quiet greenhouse on a rainy afternoon, warm light falling across the leaves..." aria-describedby="promptHint"></textarea>
+            <textarea id="promptInput" class="prompt-input" name="prompt" maxlength="2048" rows="4" placeholder="A quiet greenhouse on a rainy afternoon, warm light falling across the leaves..." aria-describedby="promptHint"></textarea>
             <div class="composer-bottom">
                 <span class="prompt-count" id="promptCounter">0 / 2,048</span>
                 <span class="keyboard-hint" id="promptHint">Use Ctrl + Enter to generate</span>
@@ -77,7 +77,7 @@
         </div>
 
         <div class="form-submit-row">
-            <p class="generation-note"><span class="note-dot" aria-hidden="true"></span> Free daily usage may be limited</p>
+            <p class="generation-note"><span class="note-dot" aria-hidden="true"></span> Free daily quota is shared across visitors</p>
             <button id="generateBtn" class="generate-btn" type="submit">
                 <svg aria-hidden="true" viewBox="0 0 24 24" fill="none"><path d="M12 3v18M3 12h18M5.64 5.64l12.72 12.72m0-12.72L5.64 18.36" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>
                 <span>Generate image</span>
@@ -113,5 +113,5 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="{{ url_for('static', filename='script.js', v='20261101') }}"></script>
+<script src="{{ url_for('static', filename='script.js', v='studio-2') }}"></script>
 {% endblock %}
