@@ -1,74 +1,54 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}AI Image Generator - Create Amazing Art with AI{% endblock %}</title>
-    <meta name="description"
-        content="{% block description %}Free AI Image Generator using Hugging Face FLUX model. Create stunning visuals from text prompts instantly.{% endblock %}">
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <meta name="theme-color" content="#f5f6f4">
+    <title>{% block title %}Ayman Image Generation — Create with AI{% endblock %}</title>
+    <meta name="description" content="{% block description %}Create original images from your ideas with Ayman Image Generation.{% endblock %}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     {% block head %}{% endblock %}
 </head>
-
 <body>
-    <header>
+    <header class="site-header">
         <div class="container nav-container">
-            <a href="/" class="files-logo">AI IMAGINE</a>
-            <nav>
-                <ul>
-                    <li><a href="/" class="{% if request.endpoint == 'index' %}active{% endif %}">Home</a></li>
-                    <li><a href="/about" class="{% if request.endpoint == 'about' %}active{% endif %}">About</a></li>
-                    <li><a href="/contact" class="{% if request.endpoint == 'contact' %}active{% endif %}">Contact</a>
-                    </li>
-                </ul>
-            </nav>
+            <a href="/" class="brand" aria-label="Ayman Image Generation home">
+                <span class="brand-mark" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <path d="M12 2.8 14.4 9.6 21.2 12l-6.8 2.4L12 21.2l-2.4-6.8L2.8 12l6.8-2.4L12 2.8Z" fill="currentColor"/>
+                        <circle cx="18.5" cy="5.5" r="1.5" fill="currentColor"/>
+                    </svg>
+                </span>
+                <span class="brand-copy"><strong>Ayman</strong><span>Image Generation</span></span>
+            </a>
+            <div class="nav-right">
+                <span class="model-indicator"><span class="status-dot" aria-hidden="true"></span> FLUX.1 Schnell</span>
+                <nav aria-label="Main navigation">
+                    <a href="/" class="{% if request.endpoint == 'index' %}active{% endif %}">Create</a>
+                    <a href="/about" class="{% if request.endpoint == 'about' %}active{% endif %}">About</a>
+                </nav>
+            </div>
         </div>
     </header>
-    <main class="container">
-        <div class="page-layout">
-            <div class="content-column full-width">
-                {% block content %}{% endblock %}
-            </div>
-        </div>
+
+    <main class="container main-shell">
+        {% block content %}{% endblock %}
     </main>
 
-    <footer>
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-brand">
-                    <h3>AI Imagine</h3>
-                    <p>A Product of <a href="#" target="_blank"
-                            class="brand-link">Ayimage Generation</a></p>
-                    <p class="mission-text">Empowering creativity through artificial intelligence.</p>
-                </div>
-                <div class="footer-links">
-                    <h3>Legal</h3>
-                    <ul>
-                        <li><a href="/privacy">Privacy Policy</a></li>
-                        <li><a href="/terms">Terms & Conditions</a></li>
-                    </ul>
-                </div>
-                <div class="footer-links">
-                    <h3>Explore</h3>
-                    <ul>
-                        <li><a href="/">Home</a></li>
-                        <li><a href="/about">About Us</a></li>
-                        <li><a href="/contact">Contact</a></li>
-                    </ul>
-                </div>
-            </div>
-            <div class="copyright">
-                &copy; {{ now_year }} AI Imagine. Built with ❤️ by <a href="#"
-                    target="_blank">Ayimage Generation</a>.
+    <footer class="site-footer">
+        <div class="container footer-inner">
+            <a href="/" class="footer-brand"><span class="footer-brand-mark">A</span><span>Ayman Image Generation</span></a>
+            <p>Made for ideas worth seeing.</p>
+            <div class="footer-links">
+                <a href="/privacy">Privacy</a>
+                <a href="/terms">Terms</a>
+                <a href="/contact">Contact</a>
             </div>
         </div>
     </footer>
-
     {% block scripts %}{% endblock %}
 </body>
-
 </html>
