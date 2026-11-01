@@ -1,4 +1,4 @@
-# AI Image Generator
+# Ayman Image Generation
 
 **Live Demo:** https://ai-image-generator-three-iota.vercel.app/
 
