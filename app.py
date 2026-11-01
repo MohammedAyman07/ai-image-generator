@@ -1,6 +1,5 @@
 import os
 import time
-import base64
 import json
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
