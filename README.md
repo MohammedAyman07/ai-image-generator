@@ -6,14 +6,14 @@
 
 This is an AI image generator I built using Python, Flask and Cloudflare Workers AI.
 
-You enter a text prompt, choose some options and the app sends the request to Cloudflare's FLUX.1-schnell image generation model. The generated image is then shown on the website and can be downloaded.
+You enter a text prompt, choose creative options, and the app sends the request to Cloudflare's FLUX.2 Klein 9B model. The generated image is then shown on the website and can be downloaded.
 
 I built this project to learn more about connecting an AI model to a real web application and handling the backend part instead of only building the frontend.
 
 ## What I Built
 
 - Generate images from text prompts
-- Uses the `black-forest-labs/FLUX.1-schnell` model
+- Uses the `@cf/black-forest-labs/flux-2-klein-9b` model
 - Different style options such as photorealistic, anime and cinematic
 - 1:1, 16:9 and 9:16 aspect ratio options
 - Image preview and download
@@ -35,7 +35,7 @@ Flask backend
        ↓
 Cloudflare Workers AI REST API
        ↓
-FLUX.1-schnell generates image
+FLUX.2 Klein 9B generates image
        ↓
 Backend returns image
        ↓
@@ -49,7 +49,7 @@ The Cloudflare account ID and API token are stored as server-side environment va
 - Python
 - Flask
 - Cloudflare Workers AI REST API
-- FLUX.1-schnell
+- FLUX.2 Klein 9B
 - HTML5
 - CSS3
 - JavaScript (ES6+)
@@ -96,7 +96,7 @@ pip install -r requirements.txt
 
 ### 3. Set up free image generation
 
-Create a free Cloudflare account and enable Workers AI. Cloudflare currently includes 10,000 Neurons per day at no charge; the quota resets daily. Create a Workers AI API token from the Workers AI dashboard and copy your Account ID. The token needs Workers AI Read and Edit permissions.
+Create a free Cloudflare account and enable Workers AI. Cloudflare Workers AI currently includes 10,000 Neurons per day at no charge. At 1,024 × 1,024 resolution, FLUX.2 Klein 9B uses about 1,364 Neurons per image, so this is roughly seven images per day before other Workers AI usage. The quota resets daily and is shared by everyone using this deployment. Create a Workers AI API token from the Workers AI dashboard and copy your Account ID. The token needs Workers AI Read and Edit permissions.
 
 Create a `.env` file using `.env.example`:
 
@@ -158,7 +158,7 @@ The tests currently check things such as:
 
 ## AI Model
 
-The project uses the `@cf/black-forest-labs/flux-1-schnell` model through Cloudflare Workers AI.
+The project uses the `@cf/black-forest-labs/flux-2-klein-9b` model through Cloudflare Workers AI.
 
 I did not train the model myself. My work in this project was mainly around integrating the model into a web application, handling the API request, backend security, image processing, frontend interaction and deployment.
 
