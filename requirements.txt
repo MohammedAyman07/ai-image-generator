@@ -1,5 +1,4 @@
 flask
 python-dotenv
-Pillow
 pytest
 pytest-flask
