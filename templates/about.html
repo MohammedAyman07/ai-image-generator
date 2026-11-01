@@ -1,56 +1,33 @@
 {% extends 'base.html' %}
-{% block title %}About AI Imagine - Our Vision & Technology{% endblock %}
-
+{% block title %}About Ayman Image Generation{% endblock %}
 {% block content %}
 <section class="about-hero">
-    <h1>Our Vision</h1>
-    <p>Bridging the gap between human imagination and digital reality through the power of generative AI.</p>
+    <p class="eyebrow"><span class="eyebrow-rule"></span> ABOUT AYMAN</p>
+    <h1>A clear space for creative ideas.</h1>
+    <p>Ayman Image Generation turns written prompts into original visuals with a simple, focused workflow.</p>
 </section>
 
-<div class="info-grid-section">
-    <div class="info-card glass-panel">
-        <div class="info-icon">🧠</div>
+<section class="info-grid-section" aria-label="About the studio">
+    <article class="info-card">
+        <div class="info-icon" aria-hidden="true">✦</div>
         <div class="info-content">
-            <h3>Advanced AI</h3>
-            <p>Powered by the state-of-the-art FLUX.1 model, we offer unparalleled fidelity and prompt adherence in
-                every masterpiece you create.</p>
+            <h3>Start with a prompt</h3>
+            <p>Describe the subject, mood, setting, and details you want to see. Add a visual style and aspect ratio to guide the result.</p>
         </div>
-    </div>
-
-    <div class="info-card glass-panel">
-        <div class="info-icon">⚡</div>
+    </article>
+    <article class="info-card">
+        <div class="info-icon" aria-hidden="true">◫</div>
         <div class="info-content">
-            <h3>Instant Magic</h3>
-            <p>Our infrastructure is optimized for performance, delivering high-resolution images in seconds, not
-                minutes.</p>
+            <h3>Built for making</h3>
+            <p>A clean workspace keeps the prompt, creative settings, and generated images together while you explore an idea.</p>
         </div>
-    </div>
-
-    <div class="info-card glass-panel">
-        <div class="info-icon">🔓</div>
+    </article>
+    <article class="info-card">
+        <div class="info-icon" aria-hidden="true">↗</div>
         <div class="info-content">
-            <h3>Open Access</h3>
-            <p>We believe in a world where creativity has no paywalls. AI Imagine is built for creators, by creators,
-                for free.</p>
+            <h3>Powered by FLUX</h3>
+            <p>Image requests are sent securely from the server to Cloudflare Workers AI using the FLUX.1 Schnell model.</p>
         </div>
-    </div>
-</div>
-
-<div class="mission-banner glass-panel">
-    <h2>Our Mission</h2>
-    <p>"To democratize digital art creation through intuitive, powerful, and accessible AI tools that empower every
-        human to be an artist."</p>
-</div>
-
-<div class="glass-panel" style="padding: 40px; margin-top: 4rem;">
-    <div class="text-content">
-        <h2>Technology Stack</h2>
-        <p>AI Imagine is more than just a tool; it's a sophisticated ecosystem. Built on a robust **Flask** backend for
-            stability and speed, we integrate directly with **Hugging Face's** global inference infrastructure. This
-            ensures that you always have access to the latest GPU compute and the most advanced neutral networks
-            available today.</p>
-        <p style="margin-top: 1rem;">We are continuously evolving, updating our style-to-prompt mapping logic to help
-            you achieve professional results without needing to learn complex prompt engineering.</p>
-    </div>
-</div>
+    </article>
+</section>
 {% endblock %}
